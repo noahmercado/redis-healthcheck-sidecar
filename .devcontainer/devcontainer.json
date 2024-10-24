@@ -1,0 +1,53 @@
+{
+    "name": "redis-hc-devcontainer",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "runArgs": ["--env-file", "${localWorkspaceFolder}/.devcontainer/.env"],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "ms-azuretools.vscode-docker",
+                "quicktype.quickt",
+                "googlecloudtools.cloudcode",
+                "esbenp.prettier-vscode",
+                "MarkLarah.pre-commit-vscode",
+                "ms-vscode.makefile-tools",
+                "hookyqr.beautify",
+                "quicktype.quicktype"
+            ],
+            "settings": {
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+                "python.analysis.typeCheckingMode": "basic",
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.shell.linux": {
+                    "zsh": {
+                        "path": "zsh"
+                      }
+                }
+            }
+        }
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2.5.2": {
+            "version": "latest",
+            "installZsh": true,
+            "installOhMyZsh": true,
+            "upgradePackages": true,
+            "username": "vscode"
+        },
+        "ghcr.io/devcontainers/features/go:1.3.1": {
+            "version": "1.23"
+        },
+        "ghcr.io/dhoeric/features/google-cloud-cli:1": {},
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+        "ghcr.io/itsmechlark/features/redis-server:1": {}
+    },
+    "postCreateCommand": {
+        "setAliases": "echo '' >> /home/vscode/.zshrc && cat ${containerWorkspaceFolder}/scripts/aliases.sh >> /home/vscode/.zshrc",
+        "setupGitHooks": "cp ${containerWorkspaceFolder}/scripts/git-hooks/* ${containerWorkspaceFolder}/.git/hooks/",
+        "addGitSafeDirectory": "git config --global --add safe.directory ${containerWorkspaceFolder}"
+    },
+    "postAttachCommand": "scripts/glogin.sh"
+}
