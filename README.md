@@ -1,4 +1,4 @@
-# Redis Healtcheck Sidecar
+# Redis Healthcheck Sidecar
 A simple sidecar container for exposing an HTTP compatible healthcheck for a Redis instance running in the same pod
 
 ## Build binary locally
