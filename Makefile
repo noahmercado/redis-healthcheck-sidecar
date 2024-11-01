@@ -13,9 +13,11 @@
 # limitations under the License.
 
 img = "us-east4-docker.pkg.dev/nam-sdbx/ontrac/redis-hc-sidecar"
-version = "1.0.0"
+version = "1.0.1"
+gcpProject = "nam-sdbx"
 
 image: build-image push-image
+remote-image: remote-build-image push-image
 
 .PHONY: server
 server:
@@ -25,6 +27,11 @@ server:
 build-image:
 	@echo "Building image: $(img):$(version)"
 	@docker build -t $(img):$(version) .
+
+.PHONY: remote-build-image
+remote-build-image:
+	@echo "Building image: $(img):$(version)"
+	@gcloud builds submit --tag $(img):$(version) --project $(gcpProject)
 
 .PHONY: push-image
 push-image:
