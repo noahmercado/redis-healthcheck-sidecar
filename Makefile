@@ -13,11 +13,10 @@
 # limitations under the License.
 
 img = "us-east4-docker.pkg.dev/nam-sdbx/ontrac/redis-hc-sidecar"
-version = "1.0.4"
+version = "1.0.5"
 gcpProject = "nam-sdbx"
 
 image: build-image push-image
-remote-image: remote-build-image push-image
 
 .PHONY: server
 server:

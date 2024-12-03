@@ -10,8 +10,16 @@ make server
 
 ## Build and push image
 - Modify the `img` and `version` variables in [Makefile](Makefile) to reflect the correct Docker image registry and version of the image you'd like to build 
+### Using local docker
 ```bash
 
 make image
+
+```
+
+### Using Cloud Build
+```bash
+
+make remote-build-image
 
 ```
