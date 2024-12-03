@@ -25,40 +25,101 @@ import (
 )
 
 var redisPort string
+var redisPwd string
+var probePort string
+var client *redis.Client
 
 func init() {
+	probePort = os.Getenv("PROBE_PORT")
+	if probePort == "" {
+		probePort = "8080"
+	}
+
 	redisPort = os.Getenv("REDIS_PORT")
 	if redisPort == "" {
 		redisPort = "6379"
 	}
+
+	redisPwd = os.Getenv("REDIS_PWD")
+	if redisPwd == "" {
+		fmt.Println("No password set for Redis")
+	}
+
+	host := fmt.Sprintf("localhost:%s", redisPort)
+
+	client = redis.NewClient(&redis.Options{
+		Addr: host,
+		Password: redisPwd,
+	})
 }
 
 func main() {
 	router := httprouter.New()
-	router.GET("/health", healthCheck)
+	router.GET("/liveness", livenessCheck)
+	router.GET("/readiness", readinessCheck)
+	router.GET("/startup", startupCheck)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	port := fmt.Sprintf(":%s", probePort)
+	log.Fatal(http.ListenAndServe(port, router))
 }
 
-func healthCheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func livenessCheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
-	host := fmt.Sprintf("localhost:%s", redisPort)
-
-	client := redis.NewClient(&redis.Options{
-		Addr: host,
-	})
-
+	fmt.Println("livenessCheck...")
 	// Ping the local Redis instance.
 	res, err := client.Ping(r.Context()).Result()
 	if err != nil {
-		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
 		log.Printf("Redis ping failed: %v", err)
+		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
 		return
 	}
 
 	if res != "PONG" && res != "LOADING" && res != "MASTERDOWN" {
-		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
 		log.Printf("Redis ping returned: %s", res)
+		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
+	}
+
+	// Potential to add additional custom checks here
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Redis health check successful: ", res)
+}
+
+func readinessCheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	fmt.Println("readinessCheck...")
+	// Ping the local Redis instance.
+	res, err := client.Ping(r.Context()).Result()
+	if err != nil {
+		log.Printf("Redis ping failed: %v", err)
+		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
+		return
+	}
+
+	if res != "PONG" {
+		log.Printf("Redis ping returned: %s", res)
+		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
+	}
+
+	// Potential to add additional custom checks here
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Redis health check successful: ", res)
+}
+
+func startupCheck(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+	fmt.Println("startUpCheck...")
+	// Ping the local Redis instance.
+	res, err := client.Ping(r.Context()).Result()
+	if err != nil {
+		log.Printf("Redis ping failed: %v", err)
+		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
+		return
+	}
+
+	if res != "PONG" && res != "LOADING" && res != "MASTERDOWN" {
+		log.Printf("Redis ping returned: %s", res)
+		http.Error(w, "Redis health check failed", http.StatusInternalServerError)
 	}
 
 	// Potential to add additional custom checks here

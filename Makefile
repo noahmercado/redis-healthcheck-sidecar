@@ -13,7 +13,7 @@
 # limitations under the License.
 
 img = "us-east4-docker.pkg.dev/nam-sdbx/ontrac/redis-hc-sidecar"
-version = "1.0.1"
+version = "1.0.4"
 gcpProject = "nam-sdbx"
 
 image: build-image push-image
@@ -37,3 +37,8 @@ remote-build-image:
 push-image:
 	@echo "Pushing image: $(img):$(version)"
 	@docker push $(img):$(version)
+
+.PHONY: test-hc
+test-hc: server
+	@echo "Starting Redis Server"
+	@redis-server ./examples/redis.conf & REDIS_PWD=testpwd ./server
